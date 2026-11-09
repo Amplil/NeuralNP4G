@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "neural-np4g"
+version = "0.1.0"
+description = "Neural NP4G relational reasoning, program extraction and verification"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = ["torch", "numpy", "gmpy2", "psutil"]
+
+[project.urls]
+Repository = "https://github.com/Amplil/NeuralNP4G"
+
+[tool.setuptools]
+include-package-data = false
+packages = ["official_neural_np4g"]
+package-dir = {official_neural_np4g = "."}
+
+[tool.setuptools.package-data]
+official_neural_np4g = ["examples/*.json", "MODEL.md"]

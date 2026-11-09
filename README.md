@@ -14,9 +14,13 @@ checkpoints, and experiment logs are not required to use it.
 ## Installation
 
 Use Python 3.10 or newer. Python 3.12 is used in the experiment command examples.
-From the workspace root containing `pyproject.toml`, install the package:
+From the root of this repository (the directory containing `pyproject.toml`),
+create a virtual environment and install the package:
 
 ```shell
+python -m venv .venv
+# POSIX; on Windows use .venv\Scripts\activate
+. .venv/bin/activate
 python -m pip install .
 ```
 
@@ -86,8 +90,8 @@ their learned gates, so an OFF gate is not a memory-saving guarantee
 ([model.py](model.py)).
 
 The training batch size of eight does not split evaluation cells. The NP4G
-evaluator has no microbatch/chunk-size option, and the canonical runner rejects
-command-line arguments. NLM's separate microbatch implementation does not apply
+evaluator has no microbatch/chunk-size option. The no-argument canonical runner
+uses the full protocol; selected-task options are described below. NLM's separate microbatch implementation does not apply
 to NP4G. Do not change test sizes, seeds, numerical dtype or verification limits
 to make a run fit and then label it the same protocol.
 
@@ -167,8 +171,9 @@ Documentation-only changes do not change this runner's source manifest:
 `_runtime_source_hashes` hashes `official_neural_np4g/*.py`, not Markdown
 ([run_official_experiments.py](run_official_experiments.py)). Python-code,
 configuration or execution-contract changes still invalidate same-run reuse.
-See the [fixed protocol](../docs/official_neural_np4g/EXPERIMENTS.md) for complete
-acceptance and resume rules.
+The runner records its fixed protocol and resume requirements in each output
+manifest. Historical research-workspace documents are not included in this
+standalone distribution.
 
 ## Basic use
 
@@ -239,8 +244,8 @@ For your own task, put its definition and labeled relational examples in one
 JSON file. Start from [examples/custom_inverse.json](examples/custom_inverse.json):
 
 ```shell
-python -m official_neural_np4g.run_official_experiments --task-file official_neural_np4g/examples/custom_inverse.json --output local/my-custom --validate-only
-python -m official_neural_np4g.run_official_experiments --task-file official_neural_np4g/examples/custom_inverse.json --seed 0 --output local/my-custom
+python -m official_neural_np4g.run_official_experiments --task-file examples/custom_inverse.json --output local/my-custom --validate-only
+python -m official_neural_np4g.run_official_experiments --task-file examples/custom_inverse.json --seed 0 --output local/my-custom
 ```
 
 Validation reports the resolved `preprocess` candidates, performs no training,
@@ -316,23 +321,31 @@ benchmark's task definitions and preprocessing are unchanged.
 
 ## Source and development layout
 
-The public Python source and its model documentation live in this directory.
-Development tests live at
-[`tests/official_neural_np4g/`](../tests/official_neural_np4g/). Research commands,
-the complete fixed protocol, and evidence interpretation are documented in
-[`docs/official_neural_np4g/EXPERIMENTS.md`](../docs/official_neural_np4g/EXPERIMENTS.md).
-Run the tests from the workspace root:
+The Python source lives at the repository root and is installed as the
+`official_neural_np4g` package. `examples/custom_inverse.json` is also included
+in the installed package. For use outside a checkout, locate it with:
 
 ```shell
-python -B -m unittest discover -s tests/official_neural_np4g -v
+python -c "from importlib.resources import files; print(files('official_neural_np4g').joinpath('examples/custom_inverse.json'))"
 ```
 
-Optional paper-only comparisons and their tests live in
-[`paper/comparisons/`](../paper/comparisons/README.md), outside the model package.
+Run the standalone smoke tests after installation:
+
+```shell
+python -B -m unittest discover -s tests -v
+```
+
+CI builds the source distribution and wheel, installs the wheel, and runs these
+tests outside the checkout on Python 3.10 and 3.12. They check runner imports,
+unary/binary model inference, and custom-data CLI validation without training.
+The original research workspace's full regression suite and experiment protocol
+documents are not included here. These smoke tests do not replace that suite,
+full training, or strict verification of a learned circuit. No research results,
+checkpoints, or benchmark evidence are shipped in this repository.
 
 ## Experiments and local output
 
-The registered protocol is `neural-np4g-full-20260919`. From the workspace root,
+The registered protocol is `neural-np4g-full-20260919`. From an environment with this package installed,
 run the complete Neural NP4G and dense NLM comparison with:
 
 ```shell
@@ -345,10 +358,8 @@ their own saved progress and use the fixed task and seed schedule. The full
 protocol is a substantial training workload; neither command is a basic
 installation check.
 
-Generated files stay outside the source package. The default local output base
-is `local/official_neural_np4g/` in a source checkout, with experiment files in
-`artifacts/<protocol>/`. An installed package uses the operating system's user
-state directory. Set `NP4G_OUTPUT_DIR` to choose a different local base:
+Generated files stay outside the source package. The installed package uses the operating system's user state directory as its
+default output base, with experiment files in `artifacts/<protocol>/`. Set `NP4G_OUTPUT_DIR` to choose a different local base:
 
 ```powershell
 $env:NP4G_OUTPUT_DIR = "D:\np4g-output"
@@ -373,5 +384,4 @@ available for separate reverification.
 `python -B -m official_neural_np4g.reverify` checks previously saved research
 circuits when their ledger and artifacts are supplied. Those files are separate
 inputs to reverification; they are not dependencies of the model package.
-See the [experiment documentation](../docs/official_neural_np4g/EXPERIMENTS.md)
-for its input and output options.
+Run `python -m official_neural_np4g.reverify --help` for input and output options.
