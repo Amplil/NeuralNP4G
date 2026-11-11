@@ -1,0 +1,23 @@
+name: Package tests
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  installed-package:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.10', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install --upgrade pip build
+      - run: python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: python -m build
+      - run: python -m pip install dist/*.whl
+      # Run outside the checkout so source files cannot mask a broken wheel.
+      - run: |
+          cd "$RUNNER_TEMP"
+          python -B -m unittest discover -s "$GITHUB_WORKSPACE/tests" -v

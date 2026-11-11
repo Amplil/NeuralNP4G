@@ -222,8 +222,9 @@ only signal determining whether an attempt stops or resumes into phase two.
 | `config.py` / `tasks.py` | Fixed NLM-10 protocol, primitives, staged curriculum, required ADFs, and ADF-only inputs |
 | `run_paper_experiments.py` / `paper_evidence.py` | Complete experiment entry point and evidence bundle produced after completion |
 
-See the external [experiment protocol](../docs/official_neural_np4g/EXPERIMENTS.md)
-for phase checkpoints, training, evaluation, and aggregation.
+See [README.md](README.md) for the standalone runners and their limitations.
+The historical research workspace experiment document is not distributed here;
+runners record protocol settings in their output manifests.
 
 ## 7. Numerical and logical verification contract
 
@@ -286,8 +287,8 @@ and the target degree. The final row represents all degrees at or above that
 bound. The verifier does not truncate at a fixed degree of 32.
 
 Algorithmic soundness and verification of the implementation or numerical
-libraries in a proof assistant are distinct claims. Regression tests include
-rational checks of affine arithmetic, comparisons with high-precision MPFR,
+libraries in a proof assistant are distinct claims. The original research workspace regression tests (not distributed in this
+standalone repository) include rational checks of affine arithmetic, comparisons with high-precision MPFR,
 subnormal values, thresholds, constrained counterexamples, exhaustive small
 structures, a degree-33 counterexample, and extraction of actual circuits.
 Tests do not replace a proof over all inputs.
