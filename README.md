@@ -11,6 +11,53 @@ The public model package is distributed under the [MIT License](LICENSE).
 The model can be imported and initialized directly. Saved research results,
 checkpoints, and experiment logs are not required to use it.
 
+## Inside Neural NP4G
+
+These animations follow Figures 1 and 4 of *Learning Programs as Neural Networks
+for Generalization and Reuse* by Shoichiro Hara and Yuji Watanabe.
+
+### Figure 1 · How a relational state changes
+
+![Animated Figure 1. Acquired predicates run once. The target arity selects the object or pair update loop. A linear readout follows the last message tick.](docs/images/figure-1-relational-computation.gif)
+
+Follow the **unary** row for a prediction about one object. It gathers
+existence (`E`), universal (`U`), or capped-count (`N`) evidence according to
+the enabled gates. Follow the **binary** row for a prediction about an ordered
+pair. Its join (`J`) gathers evidence through an intermediate object.
+Within either row, the local circuit resets on each call and runs for two
+circuit ticks. The thresholded relational state carries over to the next
+message tick. The diagram shows evaluation. During optimization (§4.3), the
+state update moves from tanh to the hard threshold over the first 20,000 updates.
+
+### Figure 4 · How a saved circuit becomes a formula
+
+![Animated Appendix D trace. The same seven hidden nodes process both father-aggregation values. Two state signs flip and the readout changes from false to true.](docs/images/figure-4-circuit-to-formula.gif)
+
+Appendix D follows the `has_father` checkpoint from seed 1 at 41,000 updates.
+The animation redraws the connections that can affect the output in two
+circuit ticks, using the coefficient signs in Table 6 and the measured bounds
+in Table 7. Four identical father-aggregation inputs reduce to one value
+`v`. With no father, `v = 0` and the logit lies in [−8.4355, −8.4354].
+With a father, `v ≈ 0.482014`, two state signs flip, and the logit lies in
+[15.3924, 15.3925]. These bounds cover both cases under the paper's exact-real
+interpretation of the checkpoint. The extracted formula
+`∃y [father(x, y) ∧ ⊤]` simplifies to `∃y father(x, y)`.
+
+### How Neural NP4G finds a red neighbor
+
+![An animated trace of A → B → C, with only B red. A receives a positive neighbor signal and is the only node predicted true.](docs/images/adjacent-to-red.gif)
+
+The `adjacent_to_red` task asks whether a node has an outgoing edge to a red
+node. Follow **B** in the input row and **A** in the prediction row. B supplies
+the red feature, and A receives the positive `cexists` signal because it points
+to B.
+
+The values come from a one-channel model with hand-set weights. In one message
+tick, the shared circuit maps each node's outgoing adjacency signal `m` to
+`4m − 1` and takes its sign as the next state. The readout doubles that state,
+giving logits of `+2, −2, −2` for A, B, and C. During training the model learns
+the weights and gates. [Model architecture](MODEL.md)
+
 ## Installation
 
 Use Python 3.10 or newer. Python 3.12 is used in the experiment command examples.
