@@ -11,6 +11,15 @@ The public model package is distributed under the [MIT License](LICENSE).
 The model can be imported and initialized directly. Saved research results,
 checkpoints, and experiment logs are not required to use it.
 
+## Model evaluation
+
+![The unary path updates each object. The binary path updates each ordered pair and can use a join through an intermediate object.](docs/images/figure-1-relational-computation.gif)
+
+When a task reuses certified predicates, their outputs are added to the input
+facts. The task sets the number of message ticks. At each tick, the same circuit
+updates the state. A linear readout then returns one logit per object or ordered
+pair. See [MODEL.md](MODEL.md) for training, verification, and predicate reuse.
+
 ## Installation
 
 Use Python 3.10 or newer. Python 3.12 is used in the experiment command examples.
